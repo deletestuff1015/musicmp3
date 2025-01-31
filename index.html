@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music.mp3</title>
+    <style>
+        body {
+            display: flex;
+            margin: 0;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        .left-section, .right-section {
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .left-section {
+            width: 30%;
+            border-right: 1px solid #ccc;
+        }
+        .right-section {
+            width: 70%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .search-results {
+            position: absolute;
+            background-color: white;
+            border: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+            width: calc(30% - 40px);
+            z-index: 1;
+            display: none;
+        }
+        .playlist {
+            margin-bottom: 20px;
+        }
+        .song-list {
+            list-style: none;
+            padding: 0;
+            height: 300px;
+            overflow-y: auto;
+            border-top: 1px solid #ccc;
+        }
+        .song-list li {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .song-list li.playing {
+            background-color: #f0f0f0;
+        }
+        .library {
+            margin-top: 20px;
+        }
+        .library h3 {
+            margin-bottom: 10px;
+        }
+        .library .library-list {
+            list-style: none;
+            padding: 0;
+            height: 300px;
+            overflow-y: auto;
+            border-top: 1px solid #ccc;
+        }
+        .library .library-list li {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .filter-button {
+            margin: 10px 0;
+            padding: 10px 20px;
+            background-color: #76c7c0;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 2;
+        }
+        .popup button {
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #76c7c0;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .popup button:hover {
+            background-color: #5aa9a8;
+        }
+        .popup-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 1;
+        }
+        .now-playing img {
+            width: 300px;
+            height: 300px;
+            object-fit: cover;
+        }
+        .song-details {
+            text-align: center;
+        }
+        .progress-bar {
+            width: 50%;
+            height: 10px;
+            background-color: #ddd;
+            margin: 10px 0;
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+        .progress-bar div {
+            height: 100%;
+            background-color: #76c7c0;
+            width: 0;
+        }
+        .controls button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="left-section">
+        <div class="search-bar">
+            <input type="text" placeholder="Search for songs..." oninput="filterSongs()">
+            <div class="search-results"></div>
+        </div>
+        <div class="playlist">
+            <h3>My Playlist</h3>
+        </div>
+        <ul class="song-list"></ul>
+        <div class="library">
+            <h3>Library</h3>
+            <button class="filter-button" onclick="showFilterPopup()">Filter Library</button>
+            <ul class="library-list">
+                <li onclick="addSong({ title: 'From The Start', artist: 'Laufey', image: 'images/from the start.jpg', file: 'musica/from the start.mp3' })">From The Start - Laufey</li>
+                <li onclick="addSong({ title: 'Valentine', artist: 'Laufey', image: 'images/valentine.jpg', file: 'musica/song.mp3' })">Valentine - Laufey</li>
+                <li onclick="addSong({ title: 'BZRP Music Sessions #24', artist: 'Bizarrap', image: 'images/bzrp 24.jpeg', file: 'musica/bzrp 24.mp3' })">BZRP Music Sessions #24 - Bizarrap</li>
+                <li onclick="addSong({ title: 'The Perfect Pair', artist: 'Beabadoobee', image: 'images/song.jpg', file: 'musica/the perfect pair.mp3' })">The Perfect Pair - Beabedoobee</li>
+                <li onclick="addSong({ title: 'Poli', artist: 'Zoé', image: 'images/reptilectric.jpeg', file: 'musica/poli.mp3' })">Poli - Zoé</li>
+                <li onclick="addSong({ title: '505', artist: 'Arctic Monkeys', image: 'images/favourite worst nightmare.jpeg', file: 'musica/505.mp3' })">505 - Arctic Monkeys</li>
+                <li onclick="addSong({ title: 'The Less I Know The Better', artist: 'Tame Impala', image: 'images/currents.jpeg', file: 'musica/the less i know the better.mp3' })">The Less I Know The Better - Tame Impala</li>
+                <li onclick="addSong({ title: 'Sofia', artist: 'Clairo', image: 'images/immunity.jpeg', file: 'musica/sofia.mp3' })">Sofia - Clairo</li>
+                <li onclick="addSong({ title: 'Toscana', artist: 'Cardellino', image: 'images/song.jpg', file: 'musica/toscana.mp3' })">Toscana - Cardellino</li>
+                <li onclick="addSong({ title: 'Locos', artist: 'Leon Larregui', image: 'images/voluma.jpeg', file: 'musica/locos.mp3' })">Locos - Leon Larregui</li>
+            </ul>
+            </ul>
+        </div>
+    </div>
+    <div class="right-section">
+        <div class="now-playing">
+            <img src="placeholder.jpg" alt="Song Image">
+        </div>
+        <div class="song-details">
+            <h2>Song Title</h2>
+            <p>Artist Name</p>
+        </div>
+        <div class="progress-bar">
+            <div></div>
+        </div>
+        <div class="controls">
+            <button onclick="prevSong()">Previous</button>
+            <button onclick="playPauseSong()">Play/Pause</button>
+            <button onclick="nextSong()">Next</button>
+        </div>
+    </div>
+
+    <div class="popup" id="filter-popup">
+        <button class="popup-close" onclick="closeFilterPopup()">×</button>
+        <h3>Filter by:</h3>
+        <button onclick="filterLibrary('title')">Song Title</button>
+        <button onclick="filterLibrary('artist')">Artist</button>
+    </div>
+    <div class="overlay" id="overlay" onclick="closeFilterPopup()"></div>
+
+    <script>
+        let library = [
+            { title: 'From The Start', artist: 'Laufey', image: 'images/from the start.jpg', file: 'musica/from the start.mp3' },
+            { title: 'Valentine', artist: 'Laufey', image: 'images/valentine.jpg', file: 'musica/valentine.mp3' },
+            { title: 'BZRP Music Sessions #24', artist: 'Bizarrap', image: 'images/bzrp 24.jpeg', file: 'musica/bzrp 24.mp3' },
+            { title: 'The Perfect Pair', artist: 'Beadadoobee', image: 'images/song.jpg', file: 'musica/the perfect pair.mp3' },
+            { title: 'Poli', artist: 'Zoé', image: 'images/reptilectric.jpeg', file: 'musica/poli.mp3' },
+            { title: '505', artist: 'Arctic Monkeys', image: 'images/favourite worst nightmare.jpeg', file: 'musica/505.mp3' },
+            { title: 'The Less I Know The Better', artist: 'Tame Impala', image: 'images/currents.jpeg', file: 'musica/the less i know the better.mp3' },
+            { title: 'Sofia', artist: 'Clairo', image: 'images/immunity.jpeg', file: 'musica/sofia.mp3' },
+            { title: 'Toscana', artist: 'Cardellino', image: 'images/song.jpg', file: 'musica/toscana.mp3' },
+            { title: 'Locos', artist: 'Leon Larregui', image: 'images/voluma.jpeg', file: 'musica/locos.mp3' }
+        ];
+        let songList = document.querySelector('.song-list');
+        let progressBar = document.querySelector('.progress-bar div');
+        let searchResults = document.querySelector('.search-results');
+        let searchBar = document.querySelector('.search-bar input');
+        let libraryList = document.querySelector('.library-list');
+        let filterPopup = document.getElementById('filter-popup');
+        let overlay = document.getElementById('overlay');
+        let currentAudio = new Audio();  // Agregar esta línea para definir el objeto de audio
+        let songs = [];
+        let currentIndex = -1;
+        let progressInterval;
+
+        currentAudio.onended = () => {
+            nextSong();  // Reproduce la siguiente canción
+        };
+
+        function addSong(song) {
+            songs.push(song);
+            let li = document.createElement('li');
+            li.textContent = `${song.title} - ${song.artist}`;
+            li.onclick = () => playSong(song);
+            songList.appendChild(li);
+        }
+
+        function playSong(song) {
+            currentAudio.src = song.file;
+            currentAudio.play();
+            updateNowPlaying(song);
+            updateProgressBar();
+            updateSongList(song);
+        }
+
+        function playPauseSong() {
+            if (currentAudio.paused) {
+                currentAudio.play();
+            } else {
+                currentAudio.pause();
+            }
+        }
+
+        function startProgressBar() {
+            function updateProgressBar() {
+                if (currentAudio.duration) {
+                    let progress = (currentAudio.currentTime / currentAudio.duration) * 100;
+                    progressBar.style.width = progress + '%';
+                }
+                requestAnimationFrame(updateProgressBar); // Asegura que la barra se actualice continuamente
+            }
+            updateProgressBar();
+        }
+
+        // Agrega el evento para actualizar la barra de progreso de forma automática
+        currentAudio.addEventListener('timeupdate', () => {
+            if (currentAudio.duration) {
+                let progress = (currentAudio.currentTime / currentAudio.duration) * 100;
+                progressBar.style.width = progress + '%';
+            }
+        });
+
+
+        function updateProgressBar() {
+            progressInterval = setInterval(() => {
+                let percent = (currentAudio.currentTime / currentAudio.duration) * 100;
+                progressBar.style.width = percent + '%';
+            }, 100);
+        }
+
+        function updateNowPlaying(song) {
+            document.querySelector('.now-playing img').src = song.image;
+            document.querySelector('.song-details h2').textContent = song.title;
+            document.querySelector('.song-details p').textContent = song.artist;
+        }
+
+        function highlightPlayingSong() {
+            Array.from(songList.children).forEach((li, idx) => {
+                li.classList.toggle('playing', idx === currentIndex);
+            });
+        }
+
+        function prevSong() {
+            currentIndex = currentIndex > 0 ? currentIndex - 1 : songs.length - 1;
+            playSong(songs[currentIndex]);
+        }
+
+        function nextSong() {
+            currentIndex = currentIndex < songs.length - 1 ? currentIndex + 1 : 0;
+            playSong(songs[currentIndex]);
+        }
+
+        function filterLibrary(criteria) {
+            library.sort((a, b) => a[criteria].localeCompare(b[criteria]));
+            renderLibrary();
+            closeFilterPopup();
+        }
+
+        function renderLibrary() {
+            libraryList.innerHTML = ''; // Limpiar la lista antes de renderizar
+            library.forEach(song => {
+                let li = document.createElement('li');
+                li.textContent = `${song.title} - ${song.artist}`; // Corrección en template literals
+                li.onclick = () => addSong(song);
+                libraryList.appendChild(li);
+            });
+        }
+
+        function showFilterPopup() {
+            filterPopup.style.display = 'block';
+            overlay.style.display = 'block';
+        }
+
+        function closeFilterPopup() {
+            filterPopup.style.display = 'none';
+            overlay.style.display = 'none';
+        }
+
+        function removeSongFromView(index) {
+            let songList = document.querySelector('.song-list');
+            if (songList.children[index]) {
+                songList.children[index].remove();
+            }
+        }
+
+        function highlightPlayingSong() {
+            Array.from(songList.children).forEach((li, idx) => {
+                li.classList.toggle('playing', idx === currentIndex);
+            });
+        }
+
+        function updateSongList(song) {
+            const listItems = songList.getElementsByTagName('li');
+            for (let li of listItems) {
+                li.classList.remove('playing');
+                if (li.textContent.includes(song.title) && li.textContent.includes(song.artist)) {
+                    li.classList.add('playing');
+                }
+            }
+        }
+        function filterSongs() {
+            let query = searchBar.value.toLowerCase();
+            searchResults.innerHTML = '';
+            if (query) {
+                library.filter(song => song.title.toLowerCase().includes(query) || song.artist.toLowerCase().includes(query))
+                    .forEach(song => {
+                        let div = document.createElement('div');
+                        div.textContent = `${song.title} - ${song.artist}`;
+                        div.onclick = () => addSong(song);
+                        searchResults.appendChild(div);
+                    });
+                searchResults.style.display = 'block';
+            } else {
+                searchResults.style.display = 'none';
+            }
+        }
+
+
+
+        renderLibrary();
+    </script>
+</body>
+</html>
