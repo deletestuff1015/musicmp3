@@ -1,2 +1,4 @@
 # musicmp3
-reproductor de musica en mp3 (con fines para escuchar musica sin necesidad de alguna aplicacion)
+este es una pagina web sin fines de lucro que sirve solo para escuchar musica y ya :)
+
+cada cancion muestra su autor debido, gracias
